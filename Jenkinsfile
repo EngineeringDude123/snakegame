@@ -1,5 +1,6 @@
-node ('New-Appserver') 
+node ('snakegame') 
 {
+
 	def app	
 	stage('Cloning git')
 	{
@@ -9,7 +10,7 @@ node ('New-Appserver')
 	
 	stage ('Build-and-tag')
 	{
-		app = docker.build("johncoll/snake_game_2024")
+		app = docker.build("johncoll/snakegame")
 	}
 
 
