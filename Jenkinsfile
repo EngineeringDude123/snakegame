@@ -1,85 +1,32 @@
-pipeline
+node('Ubuntu-Appserver-3120')
 {
-  agent none
  
-  stages
+  def app
+  stage('Cloning Git')
   {
-    stage('CLONE GIT REPOSITORY')
-    {
-      agent
+      /* Let's make sure we have the repository cloned to our workspace */
+      checkout scm
+  }
+  
+  stage('Build-and-Tag')
+  {
+      /* This builds the actual image; 
+          * This is synonymous to docker build on the command line */
+      app = docker.build('johncoll/snakegame')
+  }
+  
+  stage('Post-to-dockerhub')
+  {
+      docker.withRegistry('https://registry.hub.docker.com', 'dockerhub_credentials')
       {
-        label 'Ubuntu-Appserver-3120'
+          app.push('latest')
       }
-      steps
-      {
-        checkout scm
-      }
-    }
- 
-    stage('SCA-SAST-SNYK-TEST')
-    {
-      agent
-      {
-        label 'Ubuntu-Appserver-3120'
-      }
-      steps
-      {
-        echo "SNYK-TEST"
-      }
-    }
- 
-     stage('BUILD-AND-TAG')
-    {
-      agent
-      {
-        label 'Ubuntu-Appserver-3120'
-      }
-      steps
-      {
-         script
-         {
-            def app = docker.build("johncoll/snakegame")
-            app.tag("latest")
-         }
-      }
-    }
- 
-      stage('POST-TO-DOCKERHUB')
-    {
-      agent
-      {
-        label 'Ubuntu-Appserver-3120'
-      }
-      steps
-      {
-         script
-         {
-            docker.withRegistry("https://registry.hub.docker.com", "dockerhub_credentials")
-            {
-                def app = docker.image("johncoll/snakegame")
-                app.push("latest")
- 
-            }
-           
-         }
-      }
-    }
- 
-    stage('DEPLOYMENT')
-    {
-      agent
-      {
-        label 'Ubuntu-Appserver-3120'
-      }
-      steps
-      {
-        sh "docker-compose down"
-        sh "docker-compose up -d"
-      }
-    }
- 
-   
-   
+  }
+  
+  stage('Deploy')
+  {
+      sh "docker-compose down"
+      sh "docker-compose up -d"
   }
  
 }
