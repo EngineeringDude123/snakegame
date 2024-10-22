@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   snake:
-    image: "johncoll/snake_game_2024"
+    image: "johncoll/snakegame"
     environment: 
       - "PORT:3000"
     ports:
